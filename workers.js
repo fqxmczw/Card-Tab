@@ -7,25 +7,22 @@ const HTML_CONTENT = `
     <title>柒蓝个人导航页</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>⭐</text></svg>">
     <style>
+    /* ❗核心修复1：全局强制使用 border-box，防止 padding 撑开宽度 */
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
     /* 全局样式 */
     html, body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        scroll-behavior: smooth;
+        height: 100%; width: 100%; margin: 0; padding: 0; scroll-behavior: smooth;
+        overflow-x: hidden; /* 严禁整体页面横向滚动 */
     }
     
     body {
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        background-color: #121418;
-        color: #222;
-        transition: all 0.4s ease;
+        background-color: #121418; color: #222; transition: all 0.4s ease;
         background-image: url('https://api.tomys.top/api/acgimg');
-        background-size: cover;
-        background-position: center top;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
+        background-size: cover; background-position: center top; background-attachment: fixed; background-repeat: no-repeat;
         min-height: 100vh;
     }
 
@@ -39,31 +36,27 @@ const HTML_CONTENT = `
     body.dark-theme::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); }
     body.dark-theme::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.4); }
 
-    /* ---------------- PC端固定顶部 ---------------- */
+    /* ---------------- PC端固定顶部 (使用sticky解决遮挡) ---------------- */
     .fixed-elements {
-        position: fixed;
-        top: 0; left: 0; right: 0;
+        position: sticky; top: 0; left: 0; right: 0; z-index: 1000;
         background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
-        z-index: 1000;
-        padding: 10px;
-        height: 160px;
-        pointer-events: none;
+        padding: 10px 10px 15px 10px; height: auto;
     }
-    .center-content { pointer-events: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; padding: 0 10px; }
     body.dark-theme .fixed-elements { background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%); }
     .fixed-elements h3 { display: none; }
+    .center-content { width: 100%; max-width: 100%; text-align: center; padding: 0 10px; padding-top: 2vh;}
 
     /* 一言模块 */
     #hitokoto {
-        margin: 5px 0 20px; font-size: 15px; color: #fff; font-style: italic; max-width: 600px;
-        margin-left: auto; margin-right: auto; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); letter-spacing: 0.5px;
+        margin: 0 auto 20px auto; font-size: 15px; color: #fff; font-style: italic; max-width: 600px;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6); letter-spacing: 0.5px;
     }
     #hitokoto span { color: #4dffb8; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8); }
     body.dark-theme #hitokoto { color: #f1f2f6; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8); }
     body.dark-theme #hitokoto span { color: #7ba1e9; }
 
     /* 搜索栏样式 - 现代毛玻璃胶囊 */
-    .search-container { margin-top: 10px; display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .search-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
     .search-bar {
         display: flex; justify-content: center; margin-bottom: 15px; width: 100%; max-width: 650px; margin: 0 auto 15px auto;
         border-radius: 40px; overflow: hidden; background-color: rgba(255, 255, 255, 0.85);
@@ -76,7 +69,7 @@ const HTML_CONTENT = `
         width: 115px; outline: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6" viewBox="0 0 12 6"><path fill="%2343b883" d="M0 0l6 6 6-6z"/></svg>');
         background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.06);
     }
-    .search-bar input { flex: 1; border: none; padding: 12px 20px; font-size: 15px; background-color: transparent; outline: none; color: #333; }
+    .search-bar input { flex: 1; border: none; padding: 12px 20px; font-size: 15px; background-color: transparent; outline: none; color: #333; min-width: 0; }
     .search-bar button { border: none; background-color: transparent; color: #43b883; padding: 0 25px; cursor: pointer; font-size: 18px; transition: all 0.2s; }
     .search-bar button:hover { background-color: rgba(67, 184, 131, 0.1); color: #35a674; }
 
@@ -90,7 +83,7 @@ const HTML_CONTENT = `
     body.dark-theme select option { background-color: #252830; color: #e3e3e3; }
 
     /* 分类快捷按钮 */
-    .category-buttons-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 5px 12px; width: 100%; max-width: 1200px; margin: 5px auto 0; position: relative; }
+    .category-buttons-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 5px 12px; width: 100%; max-width: 1200px; margin: 5px auto 0; }
     .category-buttons-container::-webkit-scrollbar { height: 0; }
     .category-button {
         padding: 6px 16px; border-radius: 20px; background-color: rgba(255, 255, 255, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
@@ -105,31 +98,46 @@ const HTML_CONTENT = `
 
     /* ---------------- 主要内容区域 ---------------- */
     .content {
-        margin-top: 180px; /* PC端对应 fixed header 的高度 */
-        padding: 10px; max-width: 1600px; margin-left: auto; margin-right: auto;
-        transition: opacity 0.3s ease; padding-bottom: 60px;
+        margin-top: 15px;
+        padding: 10px; max-width: 1600px; width: 100%; margin-left: auto; margin-right: auto;
+        transition: opacity 0.3s ease; padding-bottom: 70px;
     }
     .loading .content { opacity: 0.6; }
 
-    /* 分类标题样式 */
-    .section { margin-bottom: 35px; padding: 0 15px; }
-    .section-title-container {
-        display: flex; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding-bottom: 10px; transition: border-color 0.3s ease; width: 100%; max-width: 1520px; margin-left: auto; margin-right: auto;
+    /* ========= 双级分类标题样式 ========= */
+    /* 一级分类大标题 */
+    .parent-section { margin-bottom: 50px; width: 100%; scroll-margin-top: 120px; }
+    .parent-title-container { 
+        display: flex; align-items: center; margin-bottom: 25px; padding-bottom: 12px; 
+        border-bottom: 2px solid rgba(67, 184, 131, 0.4); max-width: 1540px; margin-left: auto; margin-right: auto; width: 100%;
     }
-    body.dark-theme .section-title-container { border-bottom-color: rgba(255, 255, 255, 0.05); }
-    .section-title { font-size: 22px; font-weight: 600; color: #ffffff; position: relative; padding-left: 18px; transition: color 0.3s ease; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
-    .section-title:before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 6px; height: 22px; background-color: #43b883; border-radius: 4px; box-shadow: 0 0 8px rgba(67, 184, 131, 0.5); }
-    body.dark-theme .section-title:before { background-color: #5d7fb9; box-shadow: 0 0 8px rgba(93, 127, 185, 0.5);}
+    body.dark-theme .parent-title-container { border-bottom-color: rgba(93, 127, 185, 0.4); }
+    .parent-title { font-size: 26px; font-weight: bold; color: #43b883; margin: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+    body.dark-theme .parent-title { color: #7ba1e9; }
 
+    /* 二级分类小标题 */
+    .section { margin-bottom: 30px; padding: 0 15px 0 35px; width: 100%; }
+    .section-title-container { display: flex; align-items: center; border-bottom: 1px dashed rgba(255, 255, 255, 0.2); padding-bottom: 8px; margin-bottom: 18px; width: 100%; }
+    body.dark-theme .section-title-container { border-bottom-color: rgba(255, 255, 255, 0.08); }
+    .section-title { font-size: 18px; font-weight: 600; color: #ffffff; position: relative; padding-left: 16px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); }
+    .section-title:before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 5px; height: 18px; background-color: #f39c12; border-radius: 4px; box-shadow: 0 0 8px rgba(243, 156, 18, 0.5); }
+    body.dark-theme .section-title { color: #e3e3e3; }
+    
     /* 书签卡片样式 - 高级毛玻璃 */
-    .card-container { display: grid; grid-template-columns: repeat(auto-fit, 160px); column-gap: 25px; row-gap: 20px; justify-content: start; padding: 10px 15px 10px 45px; margin: 0 auto; max-width: 1600px; }
+    .card-container { 
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+        column-gap: 20px; row-gap: 20px; justify-content: start; 
+        padding: 5px 5px 5px 25px; margin: 0; width: 100%; 
+    }
+    
     .card {
         background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 14px; width: 160px; box-sizing: border-box;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); cursor: pointer; transition: all 0.3s ease; position: relative; user-select: none;
+        border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 12px; padding: 14px; 
+        width: 100%; min-width: 0; /* ❗核心修复2：限制卡片最小宽度，防止被撑开 */
+        box-sizing: border-box; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); cursor: pointer; transition: all 0.3s ease; position: relative; user-select: none;
         border-left: 4px solid #43b883; animation: fadeIn 0.4s ease forwards; animation-delay: calc(var(--card-index) * 0.03s); opacity: 0;
     }
+    
     .card.status-ok { border-left-color: #43b883; } .card.status-error { border-left-color: #e74c3c; } .card.status-warning { border-left-color: #9b59b6; }
     body.dark-theme .card { background-color: rgba(30, 33, 40, 0.75); border-color: rgba(255, 255, 255, 0.05); box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -138,10 +146,13 @@ const HTML_CONTENT = `
 
     .card.dragging { opacity: 0.8; transform: scale(1.05) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important; border: 2px dashed #43b883; z-index: 100; }
     body.dark-theme .card.dragging { border-color: #5d7fb9; }
-    .card-top { display: flex; align-items: center; margin-bottom: 8px; }
-    .card-icon { width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; }
-    .card-title { font-size: 15px; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-url { font-size: 12px; color: #95a5a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-top { display: flex; align-items: center; margin-bottom: 8px; width: 100%; min-width: 0; }
+    .card-icon { width: 18px; height: 18px; margin-right: 8px; border-radius: 3px; flex-shrink: 0; }
+    
+    /* ❗核心修复3：强行限制文本容器宽度，不允许撑宽卡片 */
+    .card-title { font-size: 15px; font-weight: 600; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1;}
+    .card-url { font-size: 12px; color: #95a5a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; min-width: 0;}
+    
     body.dark-theme .card-title { color: #f1f2f6; } body.dark-theme .card-url { color: #a4b0be; }
 
     .private-tag { background-color: #f39c12; color: white; font-size: 10px; font-weight: bold; padding: 3px 6px; border-radius: 4px; position: absolute; top: -8px; right: -8px; z-index: 5; box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3); }
@@ -157,7 +168,6 @@ const HTML_CONTENT = `
     .round-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 20px rgba(67, 184, 131, 0.5); }
     body.dark-theme .round-btn { background-color: #5d7fb9; box-shadow: 0 4px 15px rgba(93, 127, 185, 0.35); }
     body.dark-theme .round-btn:hover { box-shadow: 0 6px 20px rgba(93, 127, 185, 0.5); }
-    .add-btn { order: 1; } .remove-btn { order: 2; } .category-add-btn { order: 3; } .category-manage-btn { order: 4; }
     .category-manage-btn.active { background-color: #e74c3c; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.35);}
     .category-manage-btn.active:hover { background-color: #c0392b; box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);}
 
@@ -168,19 +178,19 @@ const HTML_CONTENT = `
     body.dark-theme .floating-button-group button:hover { box-shadow: 0 6px 20px rgba(93, 127, 185, 0.5); }
 
     /* 弹窗样式 - 高级圆角模糊 */
-    .dialog-overlay, .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 2000; }
-    .dialog-box, .login-modal-content { background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); padding: 30px; border-radius: 16px; width: 360px; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); animation: dialogFadeIn 0.3s ease; }
+    .dialog-overlay, .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100%; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 2000; }
+    .dialog-box, .login-modal-content { background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.6); padding: 30px; border-radius: 16px; width: 380px; max-width: 90vw; box-sizing: border-box; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); animation: dialogFadeIn 0.3s ease; }
     body.dark-theme .dialog-box, body.dark-theme .login-modal-content { background-color: rgba(30, 33, 40, 0.95); border-color: rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); color: #e3e3e3; }
     @keyframes dialogFadeIn { from { opacity: 0; transform: translateY(-30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
     .dialog-title, .login-modal h3 { margin: 0 0 20px 0; color: #333; font-size: 20px; font-weight: 600;}
     body.dark-theme .dialog-title, body.dark-theme .login-modal h3 { color: #f1f2f6; }
-    .dialog-box input[type="text"], .dialog-box select, .login-modal input { width: 100%; margin-bottom: 18px; padding: 12px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: all 0.3s; box-sizing: border-box; background-color: rgba(250,250,250,0.8); }
+    .dialog-box input[type="text"], .dialog-box select, .login-modal input { width: 100%; margin-bottom: 15px; padding: 12px 14px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: all 0.3s; box-sizing: border-box; background-color: rgba(250,250,250,0.8); }
     .dialog-box input:focus, .dialog-box select:focus, .login-modal input:focus { border-color: #43b883; box-shadow: 0 0 0 3px rgba(67, 184, 131, 0.2); outline: none; background-color: #fff; }
     body.dark-theme .dialog-box input[type="text"], body.dark-theme .dialog-box select, body.dark-theme .login-modal input { background-color: rgba(20, 22, 28, 0.8); border-color: #444; color: #e3e3e3; }
     body.dark-theme .dialog-box input:focus, body.dark-theme .dialog-box select:focus { border-color: #5d7fb9; box-shadow: 0 0 0 3px rgba(93, 127, 185, 0.3); background-color: #1a1c23; }
     .dialog-box label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; font-size: 13px;}
     body.dark-theme .dialog-box label { color: #a4b0be; }
-    .dialog-buttons, .login-modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 5px;}
+    .dialog-buttons, .login-modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;}
     .dialog-box button, .login-modal button { border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; }
     .dialog-confirm-btn, .login-modal button:not(.cancel) { background-color: #43b883; color: white; }
     .dialog-confirm-btn:hover, .login-modal button:not(.cancel):hover { background-color: #35a674; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(67, 184, 131, 0.3);}
@@ -204,7 +214,7 @@ const HTML_CONTENT = `
     body.dark-theme #custom-tooltip { background: rgba(93, 127, 185, 0.95); }
 
     /* 加载遮罩 */
-    #loading-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 7000; display: flex; align-items: center; justify-content: center; }
+    #loading-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100%; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 7000; display: flex; align-items: center; justify-content: center; }
     .loading-content { background-color: rgba(255,255,255,0.95); padding: 25px 40px; border-radius: 16px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); color: #333; font-weight: 500; }
     body.dark-theme .loading-content { background-color: rgba(30,33,40,0.95); color: #e3e3e3; }
     .spinner { width: 36px; height: 36px; border: 3px solid #f3f3f3; border-top-color: #43b883; border-radius: 50%; margin: 0 auto 15px; animation: spin 1s linear infinite; }
@@ -235,61 +245,41 @@ const HTML_CONTENT = `
     .back-to-main { background-color: #43b883; color: white; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 14px; }
     body.dark-theme .back-to-main { background-color: #5d7fb9; }
 
-    /* ==================================================
-       ❗❗❗ 终极移动端布局修复 (解决卡片遮挡与错位) ❗❗❗
-       ================================================== */
-    @media (max-width: 768px) {
-        .card-container { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-    }
-
+    /* ================= ❗❗❗ 终极移动端布局修复 ❗❗❗ ================= */
     @media (max-width: 480px) {
-        /* 核心修复 1: 弃用 position: fixed 换用 position: sticky */
-        /* 这样搜索栏和按钮会保留在文档流中，自动推开下方卡片，绝不遮挡！ */
-        .fixed-elements { 
-            position: sticky; 
-            top: 0; 
-            padding: 10px 10px 5px 10px; 
-            height: auto; 
-            min-height: auto; 
-            z-index: 1000;
-        }
-        
-        /* 核心修复 2: 恢复普通流，取消绝对定位居中 */
-        .center-content { 
-            position: static; 
-            transform: none; 
-            padding-top: 5px; 
-        }
-        
-        /* 核心修复 3: 因为上面的 sticky 已经在正常流里了，这里只需留很小的边距 */
-        .content { 
-            margin-top: 15px !important; 
-            padding-bottom: 60px; 
-        }
-        
-        /* 确保移动端分类标题永远显示 */
-        .section-title-container {
-            display: flex !important;
-            margin-bottom: 15px;
-        }
-        
-        /* UI细节适配缩放 */
+        .content { margin-top: 10px; padding: 10px 5px; }
         .search-bar { max-width: 95%; border-radius: 25px; margin-bottom: 10px; }
         .search-bar select { width: 90px; padding: 10px 5px 10px 12px; font-size: 13px; }
         .search-bar input { padding: 10px 15px; font-size: 14px; }
         .search-bar button { padding: 0 15px; font-size: 16px; }
         
-        .category-buttons-container { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; margin-top: 5px; padding: 5px; }
+        .category-buttons-container { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 5px 10px; margin-top: 0; }
         .category-button { padding: 5px 12px; font-size: 12px; }
         
-        .card-container { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 10px; }
-        .card { width: auto; max-width: 100%; padding: 12px; border-radius: 10px;}
+        .parent-section { margin-bottom: 35px; scroll-margin-top: 100px; }
+        .parent-title { font-size: 20px; padding-left: 10px;}
+        .section { padding: 0 5px 0 10px; margin-bottom: 20px;}
+        .section-title { font-size: 15px; padding-left: 12px;}
+        .section-title:before { width: 4px; height: 15px; }
+
+        /* ❗核心修复4：严格限制两列均分并设定最小宽为0，杜绝内容撑爆屏幕 */
+        .card-container { 
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            gap: 10px; 
+            padding: 5px 5px 5px 10px; 
+        }
         
-        .round-btn { width: 40px; height: 40px; font-size: 18px; }
-        .floating-button-group button { width: 40px; height: 40px; font-size: 16px; }
-        .dialog-box, .login-modal-content { width: 90%; padding: 20px; }
-        .section-title { font-size: 18px; padding-left: 14px; }
-        .section-title:before { width: 5px; height: 18px; }
+        .card { padding: 10px; border-radius: 10px;}
+        
+        /* 管理按钮避开截断 */
+        .add-remove-controls { right: 15px; bottom: 120px; top: auto; transform: none; flex-direction: column; gap: 10px; }
+        .round-btn { width: 38px; height: 38px; font-size: 18px; }
+        .round-btn svg { width: 18px; height: 18px; }
+        
+        .floating-button-group { bottom: 20px; right: 15px; gap: 12px; }
+        .floating-button-group button { width: 38px; height: 38px; font-size: 16px; }
+
+        .dialog-box, .login-modal-content { width: 90vw; padding: 20px; margin: 0 auto; }
     }
     </style>
 </head>
@@ -325,8 +315,11 @@ const HTML_CONTENT = `
             <button class="round-btn remove-btn" onclick="toggleRemoveMode()" title="编辑链接">
                 <svg viewBox="0 0 48 48" width="22" height="22"><path d="M42 26v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h14" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M14 26.72V34h7.32L42 13.31 34.7 6 14 26.72Z" stroke="white" stroke-width="4" stroke-linejoin="round" fill="none"/></svg>
             </button>
-            <button class="round-btn category-add-btn" onclick="addCategory()" title="添加分类">
-                <svg viewBox="0 0 48 48" width="22" height="22"><path d="M5 8c0-1.1.9-2 2-2h12l5 6h17c1.1 0 2 .9 2 2v26c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8Z" stroke="white" stroke-width="4" stroke-linejoin="round" fill="none"/><path d="M18 27h12M24 21v12" stroke="white" stroke-width="4" stroke-linecap="round"/></svg>
+            <button class="round-btn category-add-btn" onclick="showAddParentCatDialog()" title="添加一级分类">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><line x1="12" y1="11" x2="12" y2="17"></line><line x1="9" y1="14" x2="15" y2="14"></line></svg>
+            </button>
+            <button class="round-btn category-add-btn" onclick="showAddSubCatDialog()" title="添加二级分类" style="background-color: #f39c12;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
             </button>
             <button class="round-btn category-manage-btn" onclick="toggleEditCategory()" title="编辑分类">
                 <svg viewBox="0 0 48 48" width="22" height="22"><path d="M5 8c0-1.1.9-2 2-2h12l5 6h17c1.1 0 2 .9 2 2v26c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8Z" stroke="white" stroke-width="4" stroke-linejoin="round" fill="none"/><circle cx="24" cy="28" r="4" stroke="white" stroke-width="4" fill="none"/><path d="M24 21v3m0 8v3m4.8-12-2.1 2.1M20.8 31l-2.1 2.1M19 23l2.1 2.1M27 31l2.1 2.1M17 28h3M28 28h3" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -342,7 +335,6 @@ const HTML_CONTENT = `
             <button id="theme-toggle" onclick="toggleTheme()">◑</button>
         </div>
         
-        <!-- 弹窗部分 -->
         <div id="dialog-overlay" class="dialog-overlay" style="display: none;">
             <div id="dialog-box" class="dialog-box">
                 <h3 class="dialog-title" id="link-dialog-title">编辑书签</h3>
@@ -354,11 +346,21 @@ const HTML_CONTENT = `
                 <input type="text" id="tips-input" placeholder="可选悬停提示">
                 <label for="icon-input">图标</label>
                 <input type="text" id="icon-input" placeholder="可选 (图片URL，留空自动抓取)">
-                <label for="category-select">选择分类</label>
-                <select id="category-select"></select>
+                
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex:1;">
+                        <label for="link-parent-category-select">一级分类</label>
+                        <select id="link-parent-category-select"></select>
+                    </div>
+                    <div style="flex:1;">
+                        <label for="link-sub-category-select">二级分类</label>
+                        <select id="link-sub-category-select"></select>
+                    </div>
+                </div>
+
                 <div style="display: flex; align-items: center; margin-bottom: 20px; gap: 8px; margin-top: 5px;">
                     <input type="checkbox" id="private-checkbox" style="width: auto; margin:0;">
-                    <label for="private-checkbox" style="margin:0; cursor:pointer;">设为私密链接 (仅登录可见)</label>
+                    <label for="private-checkbox" style="margin:0; cursor:pointer;">设为私密链接</label>
                 </div>
                 <div class="dialog-buttons">
                     <button class="dialog-cancel-btn" id="dialog-cancel-btn">取消</button>
@@ -399,19 +401,33 @@ const HTML_CONTENT = `
             </div>
         </div>
 
-        <div class="dialog-overlay" id="category-dialog" style="display: none;">
+        <div class="dialog-overlay" id="simple-input-dialog" style="display: none;">
             <div class="dialog-box">
-                <h3 id="category-dialog-title" class="dialog-title">新建分类</h3>
-                <input type="text" id="category-name-input" placeholder="请输入分类名称">
+                <h3 id="simple-input-dialog-title" class="dialog-title">输入</h3>
+                <input type="text" id="simple-input-value" placeholder="请输入...">
                 <div class="dialog-buttons">
-                    <button id="category-cancel-btn" class="dialog-cancel-btn">取消</button>
-                    <button id="category-confirm-btn" class="dialog-confirm-btn">确定</button>
+                    <button id="simple-input-cancel" class="dialog-cancel-btn">取消</button>
+                    <button id="simple-input-confirm" class="dialog-confirm-btn">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="dialog-overlay" id="sub-cat-dialog" style="display: none;">
+            <div class="dialog-box">
+                <h3 class="dialog-title">新建二级分类</h3>
+                <label>所属一级分类</label>
+                <select id="sub-cat-parent-select"></select>
+                <label style="margin-top:10px;">二级分类名称</label>
+                <input type="text" id="sub-cat-name-input" placeholder="请输入二级分类名称">
+                <div class="dialog-buttons">
+                    <button id="sub-cat-cancel" class="dialog-cancel-btn">取消</button>
+                    <button id="sub-cat-confirm" class="dialog-confirm-btn">确定</button>
                 </div>
             </div>
         </div>
 
         <div id="loading-mask" style="display:none;">
-            <div class="loading-content" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); border-radius: 12px; padding: 20px 30px;">
+            <div class="loading-content">
                 <div class="spinner"></div>
                 <p style="margin: 10px 0 0 0; font-weight: 500;">加载中...</p>
             </div>
@@ -421,12 +437,12 @@ const HTML_CONTENT = `
     <div id="custom-tooltip"></div>
 
     <div id="copyright">
-        <div class="copyright-container" style="display: flex; align-items: center; justify-content: center; width: 100%; gap: 15px;">
+        <div class="copyright-container">
             <span class="site-title">柒蓝导航</span>
             <p>&copy; 2025 <a href="https://github.com/qilan28/Card-Tab" target="_blank">Card-Tab</a></p>
-            <div class="buttons-group" style="display: flex; gap: 8px;">
-                <button class="admin-btn" id="admin-btn" style="display: none; padding: 4px 10px; border-radius: 12px; font-size: 12px; border:none; background:rgba(255,255,255,0.2); color:#fff; cursor:pointer;">设置</button>
-                <button class="login-btn" id="login-btn" style="padding: 4px 10px; border-radius: 12px; font-size: 12px; border:none; background:rgba(67, 184, 131, 0.8); color:#fff; cursor:pointer;">登录</button>
+            <div class="buttons-group">
+                <button class="admin-btn" id="admin-btn" style="display: none;">设置</button>
+                <button class="login-btn" id="login-btn">登录</button>
             </div>
         </div>
     </div>
@@ -441,12 +457,11 @@ const HTML_CONTENT = `
     let isEditCategoryMode = false;
     let isDarkTheme = false;
     let links = [];
-    const categories = {};
-    let activeCategory = null;
+    let categories = {}; 
+    let activeCategory = null; 
     let isShowingSearchResults = false;
     let currentEngine = "baidu";
 
-    // 一言加载
     async function loadHitokoto() {
         try {
             const response = await fetch('https://v1.hitokoto.cn/?encode=text');
@@ -455,12 +470,11 @@ const HTML_CONTENT = `
             if (el) el.textContent = text;
         } catch (error) {
             const el = document.getElementById('hitokoto_text');
-            if (el) el.textContent = '山不在高，有仙则名。水不在深，有龙则灵。';
+            if (el) el.textContent = '盛年不重来，一日难再晨。';
         }
     }
     loadHitokoto();
 
-    // 搜索引擎配置
     const searchEngines = {
         baidu: "https://www.baidu.com/s?wd=",
         bing: "https://www.bing.com/search?q=",
@@ -510,16 +524,29 @@ const HTML_CONTENT = `
             if (!response.ok) throw new Error("HTTP error! status: " + response.status);
             const data = await response.json();
             
-            if (data.categories) Object.assign(categories, data.categories);
+            categories = {};
+            // 数据结构兼容转换
+            if (data.categories) {
+                const loadedCats = data.categories;
+                Object.keys(loadedCats).forEach(k => {
+                    if (Array.isArray(loadedCats[k]) && loadedCats[k].length > 0 && typeof loadedCats[k][0] === 'object') {
+                        categories[k] = ['默认分类'];
+                    } else if (Array.isArray(loadedCats[k])) {
+                        categories[k] = loadedCats[k];
+                    } else {
+                        categories[k] = ['默认分类'];
+                    }
+                });
+            }
+
             publicLinks = data.links ? data.links.filter(link => !link.isPrivate) : [];
             privateLinks = data.links ? data.links.filter(link => link.isPrivate) : [];
             links = isLoggedIn ? [...publicLinks, ...privateLinks] : publicLinks;
             
-            // ❗ 强制反向提取分类：以防 categories 数据丢失，根据现有书签重建分类名
             links.forEach(l => {
-                if (l.category && !categories[l.category]) {
-                    categories[l.category] = [];
-                }
+                if (!l.subCategory) l.subCategory = '默认分类';
+                if (!categories[l.category]) categories[l.category] = [];
+                if (!categories[l.category].includes(l.subCategory)) categories[l.category].push(l.subCategory);
             });
 
         } catch (error) {
@@ -527,104 +554,192 @@ const HTML_CONTENT = `
         }
     }
 
+    // 联动下拉框更新
+    document.getElementById('link-parent-category-select').addEventListener('change', (e) => {
+        updateSubCategorySelect(e.target.value);
+    });
+
+    function updateLinkCategorySelects(selectedParent = null, selectedSub = null) {
+        const pSelect = document.getElementById('link-parent-category-select');
+        pSelect.innerHTML = '';
+        const pCats = Object.keys(categories);
+        
+        if (pCats.length === 0) {
+            categories['默认分类'] = ['默认分类'];
+            pCats.push('默认分类');
+        }
+
+        pCats.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            pSelect.appendChild(opt);
+        });
+
+        pSelect.value = selectedParent && pCats.includes(selectedParent) ? selectedParent : pCats[0];
+        updateSubCategorySelect(pSelect.value, selectedSub);
+    }
+
+    function updateSubCategorySelect(parentCat, selectedSub = null) {
+        const sSelect = document.getElementById('link-sub-category-select');
+        sSelect.innerHTML = '';
+        const sCats = categories[parentCat] || [];
+        
+        if (sCats.length === 0) {
+            categories[parentCat] = ['默认分类'];
+            sCats.push('默认分类');
+        }
+
+        sCats.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            sSelect.appendChild(opt);
+        });
+
+        sSelect.value = selectedSub && sCats.includes(selectedSub) ? selectedSub : sCats[0];
+    }
+
+    // 渲染页面
     function renderSections() {
         const container = document.getElementById('sections-container');
         container.innerHTML = '';
         
-        // ❗ 核心修复：自动选中第一个有内容的分类，防止“默认什么都没有”
+        // 自动选择第一个可展示的一级分类展开
         if (!isAdmin && !activeCategory) {
-            const availableCats = Object.keys(categories).filter(cat => {
-                return links.some(l => l.category === cat && (!l.isPrivate || isLoggedIn));
+            const availableCats = Object.keys(categories).filter(pCat => {
+                if (isLoggedIn) return true;
+                return categories[pCat].some(sCat => {
+                    return links.some(l => l.category === pCat && l.subCategory === sCat && !l.isPrivate);
+                });
             });
-            if (availableCats.length > 0) {
-                activeCategory = availableCats[0];
-            }
+            if (availableCats.length > 0) activeCategory = availableCats[0];
         }
 
-        Object.keys(categories).forEach(category => {
-            const section = document.createElement('div');
-            section.className = 'section';
-            section.setAttribute('data-category', category);
+        Object.keys(categories).forEach(pCat => {
+            const pSection = document.createElement('div');
+            pSection.className = 'parent-section';
+            pSection.id = 'parent-' + pCat;
+            pSection.dataset.parent = pCat;
 
-            const titleContainer = document.createElement('div');
-            titleContainer.className = 'section-title-container';
-
-            const title = document.createElement('div');
-            title.className = 'section-title';
-            title.textContent = category;
-            titleContainer.appendChild(title);
+            const pTitleContainer = document.createElement('div');
+            pTitleContainer.className = 'parent-title-container';
+            
+            const pTitle = document.createElement('div');
+            pTitle.className = 'parent-title';
+            pTitle.textContent = pCat;
+            pTitleContainer.appendChild(pTitle);
 
             if (isAdmin) {
-                const editBtn = document.createElement('button');
-                editBtn.textContent = '重命名';
-                editBtn.className = 'edit-category-btn';
-                editBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
-                editBtn.onclick = (e) => { e.stopPropagation(); editCategoryName(category); };
-                titleContainer.appendChild(editBtn);
+                const editPBtn = document.createElement('button');
+                editPBtn.textContent = '重命名'; editPBtn.className = 'edit-category-btn';
+                editPBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
+                editPBtn.onclick = (e) => { e.stopPropagation(); editParentCategoryName(pCat); };
+                pTitleContainer.appendChild(editPBtn);
 
-                const deleteBtn = document.createElement('button');
-                deleteBtn.textContent = '删除';
-                deleteBtn.className = 'delete-category-btn';
-                deleteBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
-                deleteBtn.onclick = (e) => { e.stopPropagation(); deleteCategory(category); };
-                titleContainer.appendChild(deleteBtn);
+                const delPBtn = document.createElement('button');
+                delPBtn.textContent = '删除'; delPBtn.className = 'delete-category-btn';
+                delPBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
+                delPBtn.onclick = (e) => { e.stopPropagation(); deleteParentCategory(pCat); };
+                pTitleContainer.appendChild(delPBtn);
 
-                const upBtn = document.createElement('button');
-                upBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6l-6 6h4v6h4v-6h4z"/></svg>';
-                upBtn.className = 'move-category-btn';
-                upBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
-                upBtn.onclick = (e) => { e.stopPropagation(); moveCategory(category, -1); };
-                titleContainer.appendChild(upBtn);
+                const upPBtn = document.createElement('button');
+                upPBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6l-6 6h4v6h4v-6h4z"/></svg>';
+                upPBtn.className = 'move-category-btn'; upPBtn.style.display = isEditCategoryMode ? 'inline-flex' : 'none';
+                upPBtn.onclick = (e) => { e.stopPropagation(); moveParentCategory(pCat, -1); };
+                pTitleContainer.appendChild(upPBtn);
 
-                const downBtn = document.createElement('button');
-                downBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 18l6-6h-4v-6h-4v6h-4z"/></svg>';
-                downBtn.className = 'move-category-btn';
-                downBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
-                downBtn.onclick = (e) => { e.stopPropagation(); moveCategory(category, 1); };
-                titleContainer.appendChild(downBtn);
+                const downPBtn = document.createElement('button');
+                downPBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 18l6-6h-4v-6h-4v6h-4z"/></svg>';
+                downPBtn.className = 'move-category-btn'; downPBtn.style.display = isEditCategoryMode ? 'inline-flex' : 'none';
+                downPBtn.onclick = (e) => { e.stopPropagation(); moveParentCategory(pCat, 1); };
+                pTitleContainer.appendChild(downPBtn);
             }
-
-            const cardContainer = document.createElement('div');
-            cardContainer.className = 'card-container';
-            cardContainer.id = category;
             
-            // 如果是管理员模式或当前是激活的分类，则渲染内部卡片
-            if (isAdmin || category === activeCategory) {
-                links.forEach(link => { if (link.category === category) createCard(link, cardContainer); });
-                cardContainer.setAttribute('data-loaded', 'true');
-            } else {
-                cardContainer.setAttribute('data-loaded', 'false');
-            }
+            pSection.appendChild(pTitleContainer);
 
-            section.appendChild(titleContainer);
-            section.appendChild(cardContainer);
+            let pHasVisibleLinks = false;
 
-            let privateCount = 0, linkCount = 0;
-            links.forEach(link => {
-                if (link.category === category) {
-                    if (link.isPrivate) privateCount++;
-                    linkCount++;
+            categories[pCat].forEach(sCat => {
+                const sSection = document.createElement('div');
+                sSection.className = 'section';
+                sSection.dataset.parent = pCat;
+                sSection.dataset.sub = sCat;
+
+                const sTitleContainer = document.createElement('div');
+                sTitleContainer.className = 'section-title-container';
+
+                const sTitle = document.createElement('div');
+                sTitle.className = 'section-title';
+                sTitle.textContent = sCat;
+                sTitleContainer.appendChild(sTitle);
+
+                if (isAdmin) {
+                    const editSBtn = document.createElement('button');
+                    editSBtn.textContent = '重命名'; editSBtn.className = 'edit-category-btn';
+                    editSBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
+                    editSBtn.onclick = (e) => { e.stopPropagation(); editSubCategoryName(pCat, sCat); };
+                    sTitleContainer.appendChild(editSBtn);
+
+                    const delSBtn = document.createElement('button');
+                    delSBtn.textContent = '删除'; delSBtn.className = 'delete-category-btn';
+                    delSBtn.style.display = isEditCategoryMode ? 'inline-block' : 'none';
+                    delSBtn.onclick = (e) => { e.stopPropagation(); deleteSubCategory(pCat, sCat); };
+                    sTitleContainer.appendChild(delSBtn);
+
+                    const upSBtn = document.createElement('button');
+                    upSBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 6l-6 6h4v6h4v-6h4z"/></svg>';
+                    upSBtn.className = 'move-category-btn'; upSBtn.style.display = isEditCategoryMode ? 'inline-flex' : 'none';
+                    upSBtn.onclick = (e) => { e.stopPropagation(); moveSubCategory(pCat, sCat, -1); };
+                    sTitleContainer.appendChild(upSBtn);
+
+                    const downSBtn = document.createElement('button');
+                    downSBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 18l6-6h-4v-6h-4v6h-4z"/></svg>';
+                    downSBtn.className = 'move-category-btn'; downSBtn.style.display = isEditCategoryMode ? 'inline-flex' : 'none';
+                    downSBtn.onclick = (e) => { e.stopPropagation(); moveSubCategory(pCat, sCat, 1); };
+                    sTitleContainer.appendChild(downSBtn);
+                }
+
+                const cardContainer = document.createElement('div');
+                cardContainer.className = 'card-container';
+                cardContainer.id = 'cat-' + pCat + '-' + sCat; 
+                cardContainer.dataset.parent = pCat;
+                cardContainer.dataset.sub = sCat;
+
+                if (isAdmin || pCat === activeCategory) {
+                    links.forEach(l => { if(l.category === pCat && l.subCategory === sCat) createCard(l, cardContainer); });
+                    cardContainer.setAttribute('data-loaded', 'true');
+                } else {
+                    cardContainer.setAttribute('data-loaded', 'false');
+                }
+
+                sSection.appendChild(sTitleContainer);
+                sSection.appendChild(cardContainer);
+
+                let linkCount = 0, privateCount = 0;
+                links.forEach(l => {
+                    if (l.category === pCat && l.subCategory === sCat) {
+                        linkCount++;
+                        if (l.isPrivate) privateCount++;
+                    }
+                });
+
+                const countSpan = document.createElement('span');
+                countSpan.textContent = '(' + linkCount + ')';
+                countSpan.style.marginLeft = '10px'; countSpan.style.fontSize = '12px'; countSpan.style.color = '#888';
+                sTitleContainer.appendChild(countSpan);
+
+                if (privateCount < linkCount || isLoggedIn || isAdmin) {
+                    pHasVisibleLinks = true;
+                    pSection.appendChild(sSection);
                 }
             });
 
-            const countSpan = document.createElement('span');
-            countSpan.textContent = '(' + linkCount + ')';
-            countSpan.style.marginLeft = '10px';
-            countSpan.style.fontSize = '14px';
-            countSpan.style.color = '#888';
-            titleContainer.appendChild(countSpan);
-            
-            titleContainer.style.cursor = 'pointer';
-            titleContainer.addEventListener('click', () => loadCategoryCards(category));
-
-            if (privateCount < linkCount || isLoggedIn) {
-                section.style.display = (isAdmin || category === activeCategory) ? 'block' : 'none';
-                container.appendChild(section);
+            if (pHasVisibleLinks || isAdmin || isLoggedIn) {
+                pSection.style.display = (isAdmin || pCat === activeCategory) ? 'block' : 'none';
+                container.appendChild(pSection);
             }
         });
         
         renderCategoryButtons();
-        updateCategorySelect(); // 同步刷新下拉框
     }
 
     function createCard(link, container) {
@@ -720,30 +835,38 @@ const HTML_CONTENT = `
     function isValidUrl(url) { try { new URL(url); return true; } catch { return false; } }
 
     /* ---------------- UI 交互逻辑 ---------------- */
-    function loadCategoryCards(category) {
-        if (activeCategory === category && !isAdmin) {
-            document.querySelector('.section[data-category="' + category + '"]').style.display = 'none';
+    function loadCategoryCards(pCat) {
+        if (activeCategory === pCat && !isAdmin) {
+            const currentSection = document.getElementById('parent-' + pCat);
+            if (currentSection) currentSection.style.display = 'none';
             activeCategory = null;
             updateActiveCategoryButton(null);
             return;
         }
         
         if (!isAdmin) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            const target = document.querySelector('.section[data-category="' + category + '"]');
+            document.querySelectorAll('.parent-section').forEach(s => s.style.display = 'none');
+            const target = document.getElementById('parent-' + pCat);
             if(target) target.style.display = 'block';
         }
         
-        const container = document.getElementById(category);
-        if (container && container.getAttribute('data-loaded') !== 'true') {
-            container.innerHTML = '';
-            links.forEach(link => { if (link.category === category) createCard(link, container); });
-            container.setAttribute('data-loaded', 'true');
+        // 动态加载内容
+        const pSection = document.getElementById('parent-' + pCat);
+        if (pSection) {
+            const containers = pSection.querySelectorAll('.card-container');
+            containers.forEach(container => {
+                if (container.getAttribute('data-loaded') !== 'true') {
+                    container.innerHTML = '';
+                    const sCat = container.dataset.sub;
+                    links.forEach(link => { if (link.category === pCat && link.subCategory === sCat) createCard(link, container); });
+                    container.setAttribute('data-loaded', 'true');
+                }
+            });
         }
         
-        scrollToCategory(category);
-        activeCategory = category;
-        updateActiveCategoryButton(category);
+        scrollToCategory(pCat);
+        activeCategory = pCat;
+        updateActiveCategoryButton(pCat);
     }
 
     function renderCategoryButtons() {
@@ -754,14 +877,16 @@ const HTML_CONTENT = `
         if (allKeys.length === 0) return container.style.display = 'none';
         
         let count = 0;
-        allKeys.forEach(cat => {
-            const vLinks = links.filter(l => l.category === cat && (!l.isPrivate || isLoggedIn));
-            if (vLinks.length > 0) {
+        allKeys.forEach(pCat => {
+            const hasVisible = categories[pCat].some(sCat => {
+                return links.some(l => l.category === pCat && l.subCategory === sCat && (!l.isPrivate || isLoggedIn));
+            });
+            if (hasVisible || isLoggedIn || isAdmin) {
                 const btn = document.createElement('button');
                 btn.className = 'category-button';
-                btn.textContent = cat;
-                if(cat === activeCategory) btn.classList.add('active');
-                btn.onclick = () => { if(isShowingSearchResults) hideSearchResults(); loadCategoryCards(cat); };
+                btn.textContent = pCat;
+                if(pCat === activeCategory) btn.classList.add('active');
+                btn.onclick = () => { if(isShowingSearchResults) hideSearchResults(); loadCategoryCards(pCat); };
                 container.appendChild(btn);
                 count++;
             }
@@ -776,73 +901,74 @@ const HTML_CONTENT = `
     }
 
     function scrollToCategory(cat) {
-        const el = document.getElementById(cat);
+        const el = document.getElementById('parent-' + cat);
         if (el) {
-            const offset = window.innerWidth <= 480 ? 140 : 200;
-            window.scrollTo({ top: window.pageYOffset + el.getBoundingClientRect().top - offset, behavior: 'smooth' });
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
-    // ❗ 终极修复：下拉框为空及内容不同步的问题
-    function updateCategorySelect(selectedCat = null) {
-        const categorySelect = document.getElementById('category-select');
-        if (!categorySelect) return;
-        
-        // 再次强制补全分类字典 (防止因各种原因导致categories对象漏了某个已有的类)
-        links.forEach(l => {
-            if (l.category && !categories[l.category]) {
-                categories[l.category] = [];
-            }
+    /* ---------------- 双层分类结构管理核心 ---------------- */
+    
+    // 自定义通用输入弹窗
+    function showSimpleInputDialog(title, def='') {
+        return new Promise(res => {
+            const d = document.getElementById('simple-input-dialog');
+            document.getElementById('simple-input-dialog-title').textContent = title;
+            const input = document.getElementById('simple-input-value');
+            input.value = def; d.style.display = 'flex'; setTimeout(()=>input.focus(),50);
+            document.getElementById('simple-input-confirm').onclick = () => { if(input.value.trim()){ d.style.display='none'; res(input.value.trim()); }};
+            document.getElementById('simple-input-cancel').onclick = () => { d.style.display='none'; res(null); };
         });
-
-        let allCats = Object.keys(categories);
-        
-        // 兜底：如果此时还是没任何分类，提供一个初始分类名防止无法添加新书签
-        if (allCats.length === 0) {
-            categories['默认分类'] = [];
-            allCats = ['默认分类'];
-        }
-
-        categorySelect.innerHTML = '';
-        allCats.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categorySelect.appendChild(option);
-        });
-        
-        // 应用选中状态
-        if (selectedCat && allCats.includes(selectedCat)) {
-            categorySelect.value = selectedCat;
-        } else if (allCats.length > 0) {
-            categorySelect.value = allCats[0];
-        }
     }
 
-    /* ---------------- 分类与链接管理 ---------------- */
-    async function addCategory() {
+    async function showAddParentCatDialog() {
         if (!await validateToken()) return;
-        const name = await showCategoryDialog('请输入新分类名称');
+        const name = await showSimpleInputDialog('新建一级分类');
         if (name && !categories[name]) {
-            categories[name] = [];
-            renderSections(); saveLinks();
+            categories[name] = ['默认分类'];
+            try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+            renderSections();
         } else if (categories[name]) customAlert('该分类已存在');
     }
 
-    async function deleteCategory(cat) {
+    async function showAddSubCatDialog() {
         if (!await validateToken()) return;
-        if (await customConfirm('确定删除 "'+cat+'" 及其下所有链接？')) {
-            delete categories[cat];
-            links = links.filter(l => l.category !== cat);
-            publicLinks = publicLinks.filter(l => l.category !== cat);
-            privateLinks = privateLinks.filter(l => l.category !== cat);
-            renderSections(); saveLinks();
-        }
+        if (Object.keys(categories).length === 0) return customAlert('请先创建一级分类');
+        
+        return new Promise(res => {
+            const d = document.getElementById('sub-cat-dialog');
+            const sel = document.getElementById('sub-cat-parent-select');
+            const inp = document.getElementById('sub-cat-name-input');
+            
+            sel.innerHTML = '';
+            Object.keys(categories).forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k; opt.textContent = k;
+                sel.appendChild(opt);
+            });
+            inp.value = '';
+            d.style.display = 'flex'; setTimeout(()=>inp.focus(),50);
+
+            document.getElementById('sub-cat-confirm').onclick = async () => {
+                const pCat = sel.value; const sCat = inp.value.trim();
+                if(sCat){
+                    if(!categories[pCat].includes(sCat)) {
+                        categories[pCat].push(sCat);
+                        try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+                        renderSections();
+                        d.style.display='none'; res(true); 
+                    } else {
+                        customAlert('该二级分类已存在');
+                    }
+                }
+            };
+            document.getElementById('sub-cat-cancel').onclick = () => { d.style.display='none'; res(null); };
+        });
     }
 
-    async function editCategoryName(old) {
+    async function editParentCategoryName(old) {
         if (!await validateToken()) return;
-        const name = await showCategoryDialog('请输入新分类名称', old);
+        const name = await showSimpleInputDialog('重命名一级分类', old);
         if (!name || name === old) return;
         if (categories[name]) return customAlert('名称已存在');
 
@@ -851,30 +977,82 @@ const HTML_CONTENT = `
         Object.keys(categories).forEach(k => delete categories[k]);
         Object.assign(categories, newCats);
 
-        [...publicLinks, ...privateLinks, ...links].forEach(l => { if(l.category===old) l.category=name; });
-        renderSections(); saveLinks();
+        [...publicLinks, ...privateLinks, links].forEach(arr => { arr.forEach(l => { if(l.category===old) l.category=name; }); });
+        if(activeCategory === old) activeCategory = name;
+        try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+        renderSections();
     }
 
-    async function moveCategory(cat, dir) {
+    async function editSubCategoryName(pCat, oldSub) {
+        if (!await validateToken()) return;
+        const name = await showSimpleInputDialog('重命名二级分类', oldSub);
+        if (!name || name === oldSub) return;
+        if (categories[pCat].includes(name)) return customAlert('名称已存在');
+
+        const idx = categories[pCat].indexOf(oldSub);
+        categories[pCat][idx] = name;
+
+        [...publicLinks, ...privateLinks, links].forEach(arr => { arr.forEach(l => { if(l.category===pCat && l.subCategory===oldSub) l.subCategory=name; }); });
+        try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+        renderSections();
+    }
+
+    async function deleteParentCategory(pCat) {
+        if (!await validateToken()) return;
+        if (await customConfirm('确定删除一级分类 "'+pCat+'" 及其下所有内容？')) {
+            delete categories[pCat];
+            links = links.filter(l => l.category !== pCat);
+            publicLinks = publicLinks.filter(l => l.category !== pCat);
+            privateLinks = privateLinks.filter(l => l.category !== pCat);
+            if (activeCategory === pCat) activeCategory = null;
+            try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+            renderSections();
+        }
+    }
+
+    async function deleteSubCategory(pCat, sCat) {
+        if (!await validateToken()) return;
+        if (await customConfirm('确定删除二级分类 "'+sCat+'" 及其下所有链接？')) {
+            categories[pCat] = categories[pCat].filter(s => s !== sCat);
+            links = links.filter(l => !(l.category === pCat && l.subCategory === sCat));
+            publicLinks = publicLinks.filter(l => !(l.category === pCat && l.subCategory === sCat));
+            privateLinks = privateLinks.filter(l => !(l.category === pCat && l.subCategory === sCat));
+            try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+            renderSections();
+        }
+    }
+
+    async function moveParentCategory(cat, dir) {
         if (!await validateToken()) return;
         const keys = Object.keys(categories);
         const idx = keys.indexOf(cat);
         const nIdx = idx + dir;
         if (nIdx < 0 || nIdx >= keys.length) return;
 
-        const newCats = {};
-        const reordered = [...keys];
+        const newCats = {}; const reordered = [...keys];
         [reordered[idx], reordered[nIdx]] = [reordered[nIdx], reordered[idx]];
         reordered.forEach(k => newCats[k] = categories[k]);
         
         Object.keys(categories).forEach(k => delete categories[k]);
         Object.assign(categories, newCats);
-        renderSections(); saveLinks();
+        try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+        renderSections();
+    }
+
+    async function moveSubCategory(pCat, sCat, dir) {
+        if (!await validateToken()) return;
+        const arr = categories[pCat];
+        const idx = arr.indexOf(sCat);
+        const nIdx = idx + dir;
+        if (nIdx < 0 || nIdx >= arr.length) return;
+        [arr[idx], arr[nIdx]] = [arr[nIdx], arr[idx]];
+        try { await saveLinks(); } catch(e) { await loadLinks(); customAlert('保存失败，请重试'); }
+        renderSections();
     }
 
     function toggleEditCategory() {
         isEditCategoryMode = !isEditCategoryMode;
-        document.querySelectorAll('.delete-category-btn, .edit-category-btn, .move-category-btn').forEach(b => b.style.display = isEditCategoryMode ? 'inline-block' : 'none');
+        document.querySelectorAll('.delete-category-btn, .edit-category-btn, .move-category-btn').forEach(b => b.style.display = isEditCategoryMode ? 'inline-flex' : 'none');
         const btn = document.querySelector('.category-manage-btn');
         isEditCategoryMode ? btn.classList.add('active') : btn.classList.remove('active');
     }
@@ -892,8 +1070,7 @@ const HTML_CONTENT = `
         document.getElementById('dialog-overlay').style.display = 'flex';
         document.getElementById('link-dialog-title').innerText='添加书签';
         
-        // 显示弹窗时强制更新分类列表
-        updateCategorySelect(); 
+        updateLinkCategorySelects();
 
         ['name-input','url-input','tips-input','icon-input'].forEach(id => document.getElementById(id).value='');
         document.getElementById('private-checkbox').checked = false;
@@ -906,8 +1083,7 @@ const HTML_CONTENT = `
         document.getElementById('dialog-overlay').style.display = 'flex';
         document.getElementById('link-dialog-title').innerText='编辑书签';
         
-        // 显示弹窗时强制更新分类列表，并选中当前链接所在分类
-        updateCategorySelect(link.category); 
+        updateLinkCategorySelects(link.category, link.subCategory);
 
         document.getElementById('name-input').value = link.name;
         document.getElementById('url-input').value = link.url;
@@ -939,9 +1115,15 @@ const HTML_CONTENT = `
 
         link.isPrivate ? privateLinks.push(link) : publicLinks.push(link);
         links = isLoggedIn ? [...publicLinks, ...privateLinks] : publicLinks;
-        
-        renderSections(); saveLinks();
-        document.getElementById('dialog-overlay').style.display = 'none';
+
+        try {
+            await saveLinks();
+            renderSections();
+            document.getElementById('dialog-overlay').style.display = 'none';
+        } catch(e) {
+            await loadLinks(); renderSections();
+            customAlert('保存失败，请重试');
+        }
     }
 
     async function updateLink(oldLink) {
@@ -962,19 +1144,27 @@ const HTML_CONTENT = `
         }
 
         links = isLoggedIn ? [...publicLinks, ...privateLinks] : publicLinks;
-        saveLinks(); renderSections();
-        document.getElementById('dialog-overlay').style.display = 'none';
+        try {
+            await saveLinks(); renderSections();
+            document.getElementById('dialog-overlay').style.display = 'none';
+        } catch(e) {
+            await loadLinks(); renderSections();
+            customAlert('保存失败，请重试');
+        }
     }
 
     function getDialogData() {
         const name = document.getElementById('name-input').value.trim();
         const url = document.getElementById('url-input').value.trim();
-        if(!name || !url) { customAlert('名称和地址必填'); return null; }
+        const pCat = document.getElementById('link-parent-category-select').value;
+        const sCat = document.getElementById('link-sub-category-select').value;
+
+        if(!name || !url || !pCat || !sCat) { customAlert('信息不全'); return null; }
         return {
             name, url,
             tips: document.getElementById('tips-input').value.trim(),
             icon: document.getElementById('icon-input').value.trim(),
-            category: document.getElementById('category-select').value,
+            category: pCat, subCategory: sCat,
             isPrivate: document.getElementById('private-checkbox').checked
         };
     }
@@ -987,7 +1177,12 @@ const HTML_CONTENT = `
         links = links.filter(l => l.url !== url);
         publicLinks = publicLinks.filter(l => l.url !== url);
         privateLinks = privateLinks.filter(l => l.url !== url);
-        card.remove(); saveLinks();
+        try {
+            await saveLinks(); card.remove();
+        } catch(e) {
+            await loadLinks(); renderSections();
+            customAlert('删除失败，请重试');
+        }
     }
 
     /* ---------------- 拖拽逻辑 ---------------- */
@@ -1013,49 +1208,59 @@ const HTML_CONTENT = `
     function drop(e) {
         if(!isAdmin || !draggedCard) return e.preventDefault();
         e.preventDefault();
-        const cat = e.target.closest('.card-container').id;
-        updateCardCat(draggedCard, cat);
+        const container = e.target.closest('.card-container');
+        if(!container) { dragEnd(); return; }
+
+        updateCardCat(draggedCard, container);
         saveCardOrder();
         dragEnd();
     }
-    function updateCardCat(card, cat) {
+    function updateCardCat(card, container) {
+        const pCat = container.dataset.parent;
+        const sCat = container.dataset.sub;
         const url = card.getAttribute('data-url');
         [links, publicLinks, privateLinks].forEach(arr => {
             const item = arr.find(l => l.url === url);
-            if(item) item.category = cat;
+            if(item) { item.category = pCat; item.subCategory = sCat; }
         });
-        card.dataset.category = cat;
+        card.dataset.parent = pCat;
+        card.dataset.sub = sCat;
     }
 
     async function saveCardOrder() {
         if(!await validateToken()) return;
-        const containers = document.querySelectorAll('.card-container');
+        const parentSections = document.querySelectorAll('.parent-section');
         let np = [], npr = [], nc = {};
         
-        containers.forEach(cont => {
-            const cat = cont.id;
-            nc[cat] = [];
-            [...cont.children].forEach(c => {
-                const url = c.getAttribute('data-url');
-                const isPriv = c.dataset.isPrivate === 'true';
-                const original = links.find(l => l.url === url) || {};
-                const link = { name: c.querySelector('.card-title').textContent, url, tips: original.tips, icon: original.icon, category: cat, isPrivate: isPriv };
-                isPriv ? npr.push(link) : np.push(link);
-                nc[cat].push(link);
+        parentSections.forEach(pSec => {
+            const pCat = pSec.dataset.parent;
+            nc[pCat] = [];
+            pSec.querySelectorAll('.card-container').forEach(cont => {
+                const sCat = cont.dataset.sub;
+                nc[pCat].push(sCat);
+                [...cont.children].forEach(c => {
+                    const url = c.getAttribute('data-url');
+                    const isPriv = c.dataset.isPrivate === 'true';
+                    const original = links.find(l => l.url === url) || {};
+                    const link = { name: c.querySelector('.card-title').textContent, url, tips: original.tips, icon: original.icon, category: pCat, subCategory: sCat, isPrivate: isPriv };
+                    isPriv ? npr.push(link) : np.push(link);
+                });
             });
         });
+        
         publicLinks = np; privateLinks = npr;
         Object.keys(categories).forEach(k => delete categories[k]); Object.assign(categories, nc);
         await saveLinks();
     }
 
     async function saveLinks() {
-        if (isAdmin && !await validateToken()) return;
         const all = [...publicLinks, ...privateLinks];
         all.forEach(l => { if(!l.status) l.status='ok'; if(!l.lastChecked) l.lastChecked=new Date().toISOString(); });
-        try {
-            await fetch('/api/saveOrder', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('authToken') }, body: JSON.stringify({ userId: 'testUser', links: all, categories }) });
-        } catch(e) {}
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = token;
+        const res = await fetch('/api/saveOrder', { method: 'POST', headers, body: JSON.stringify({ userId: 'testUser', links: all, categories }) });
+        if (!res.ok) throw new Error('Save failed: ' + res.status);
     }
 
     /* ---------------- 其他辅助 ---------------- */
@@ -1082,7 +1287,6 @@ const HTML_CONTENT = `
     function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
     window.addEventListener('scroll', () => { document.getElementById('back-to-top-btn').style.display = window.scrollY > 300 ? 'flex' : 'none'; });
 
-    // 悬浮提示
     function handleTooltipMouseMove(e, tips, isAdmin) {
         const tt = document.getElementById('custom-tooltip');
         if(!tips || isAdmin) return tt.style.display = 'none';
@@ -1094,7 +1298,6 @@ const HTML_CONTENT = `
     }
     function handleTooltipMouseLeave() { document.getElementById('custom-tooltip').style.display = 'none'; }
 
-    // 自定义弹窗逻辑
     function customAlert(msg) {
         return new Promise(res => {
             const overlay = document.getElementById('custom-alert-overlay');
@@ -1113,18 +1316,7 @@ const HTML_CONTENT = `
             document.getElementById('custom-confirm-cancel').onclick = () => { overlay.style.display='none'; res(false); };
         });
     }
-    function showCategoryDialog(title, def='') {
-        return new Promise(res => {
-            const d = document.getElementById('category-dialog');
-            document.getElementById('category-dialog-title').textContent = title;
-            const input = document.getElementById('category-name-input');
-            input.value = def; d.style.display = 'flex'; setTimeout(()=>input.focus(),50);
-            document.getElementById('category-confirm-btn').onclick = () => { if(input.value.trim()){ d.style.display='none'; res(input.value.trim()); }};
-            document.getElementById('category-cancel-btn').onclick = () => { d.style.display='none'; res(null); };
-        });
-    }
 
-    // 搜索
     function filterBookmarksByKeyword(kw) {
         kw = kw.toLowerCase();
         const matched = links.filter(l => (l.name||'').toLowerCase().includes(kw) || (l.tips||'').toLowerCase().includes(kw) || l.url.toLowerCase().includes(kw));
@@ -1143,7 +1335,6 @@ const HTML_CONTENT = `
         if(activeCategory) scrollToCategory(activeCategory);
     }
 
-    // 登录验证
     async function performLogin() {
         const pwd = document.getElementById('login-password').value;
         if(!pwd) return;
@@ -1152,7 +1343,7 @@ const HTML_CONTENT = `
             const data = await res.json();
             if(data.valid) {
                 isLoggedIn = true; localStorage.setItem('authToken', data.token);
-                loadLinks(); document.getElementById('login-modal').style.display='none'; updateLoginButton();
+                await loadLinks(); renderSections(); document.getElementById('login-modal').style.display='none'; updateLoginButton();
             } else customAlert('密码错误');
         } catch(e) {}
     }
@@ -1235,7 +1426,7 @@ export default {
             const filteredLinks = parsedData.links.filter(link => !link.isPrivate);
             const filteredCategories = {};
             Object.keys(parsedData.categories).forEach(cat => {
-                filteredCategories[cat] = parsedData.categories[cat].filter(link => !link.isPrivate);
+                filteredCategories[cat] = parsedData.categories[cat]; // 返回二级分类列表，私密控制由前端渲染负责
             });
 
             return new Response(JSON.stringify({ links: filteredLinks, categories: filteredCategories }), { headers: { 'Content-Type': 'application/json' } });
