@@ -524,6 +524,24 @@ const HTML_CONTENT = `
             if (!response.ok) throw new Error("HTTP error! status: " + response.status);
             const data = await response.json();
             
+            // 兼容旧格式：categories 里存的是链接对象数组而非子分类名
+            if (data.categories) {
+                Object.keys(data.categories).forEach(cat => {
+                    const val = data.categories[cat];
+                    if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object') {
+                        // 旧格式：把嵌在分类里的链接提取到 data.links 中
+                        if (!data.links) data.links = [];
+                        val.forEach(linkObj => {
+                            if (!data.links.some(l => l.url === linkObj.url)) {
+                                if (!linkObj.category) linkObj.category = cat;
+                                if (!linkObj.subCategory) linkObj.subCategory = '默认分类';
+                                data.links.push(linkObj);
+                            }
+                        });
+                    }
+                });
+            }
+
             categories = {};
             // 数据结构兼容转换
             if (data.categories) {
@@ -1417,10 +1435,62 @@ export default {
         if (data) {
             const parsedData = JSON.parse(data);
             for (const link of (parsedData.links || [])) if (!link.status) link.status = 'ok';
+
+            // 自动迁移旧格式：categories 里如果存的是链接对象而非子分类名，提取到 links 中
+            if (parsedData.categories) {
+                let migrated = false;
+                Object.keys(parsedData.categories).forEach(cat => {
+                    const val = parsedData.categories[cat];
+                    if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object') {
+                        migrated = true;
+                        val.forEach(linkObj => {
+                            if (!parsedData.links) parsedData.links = [];
+                            if (!parsedData.links.some(l => l.url === linkObj.url)) {
+                                if (!linkObj.category) linkObj.category = cat;
+                                if (!linkObj.subCategory) linkObj.subCategory = '默认分类';
+                                if (!linkObj.status) linkObj.status = 'ok';
+                                parsedData.links.push(linkObj);
+                            }
+                        });
+                        parsedData.categories[cat] = ['默认分类'];
+                    }
+                });
+                if (migrated) {
+                    await env.CARD_ORDER.put(userId, JSON.stringify(parsedData));
+                }
+            }
             
             if (authToken) {
                 const validation = await validateServerToken(authToken, env);
-                if (validation.isValid) return new Response(JSON.stringify(parsedData), { headers: { 'Content-Type': 'application/json' } });
+                if (!validation.isValid) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+
+                // 一次性恢复：从备份中合并 testUser 缺失的私密链接
+                if (userId === 'testUser' && !parsedData._mergedFromBackup) {
+                    try {
+                        const backupData = await env.CARD_ORDER.get('backup_1777823865246');
+                        if (backupData) {
+                            const backup = JSON.parse(backupData);
+                            const backupPrivateLinks = (backup.links || []).filter(l => l.isPrivate);
+                            let merged = false;
+                            backupPrivateLinks.forEach(bl => {
+                                if (!parsedData.links.some(l => l.url === bl.url)) {
+                                    if (!bl.subCategory) bl.subCategory = '默认分类';
+                                    if (!bl.status) bl.status = 'ok';
+                                    if (!bl.lastChecked) bl.lastChecked = new Date().toISOString();
+                                    parsedData.links.push(bl);
+                                    if (!parsedData.categories[bl.category]) parsedData.categories[bl.category] = ['默认分类'];
+                                    merged = true;
+                                }
+                            });
+                            if (merged) {
+                                parsedData._mergedFromBackup = true;
+                                await env.CARD_ORDER.put(userId, JSON.stringify(parsedData));
+                            }
+                        }
+                    } catch (e) { /* 恢复失败不影响正常使用 */ }
+                }
+
+                return new Response(JSON.stringify(parsedData), { headers: { 'Content-Type': 'application/json' } });
             }
 
             const filteredLinks = parsedData.links.filter(link => !link.isPrivate);
@@ -1471,6 +1541,22 @@ export default {
             if (sourceData) {
                 const backupId = `backup_${Date.now()}`;
                 await env.CARD_ORDER.put(backupId, sourceData);
+
+                // 只保留最近 5 个备份，删除旧的
+                try {
+                    const list = await env.CARD_ORDER.list({ prefix: 'backup_' });
+                    const backups = (list.keys || []).map(k => k.name).filter(n => n.startsWith('backup_'));
+                    backups.sort((a, b) => {
+                        const ta = parseInt(a.replace('backup_', '')) || 0;
+                        const tb = parseInt(b.replace('backup_', '')) || 0;
+                        return tb - ta; // 降序，最新的在前
+                    });
+                    const toDelete = backups.slice(5); // 保留前5个，删除其余
+                    for (const key of toDelete) {
+                        await env.CARD_ORDER.delete(key);
+                    }
+                } catch (e) { /* 清理失败不影响备份 */ }
+
                 return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
             }
         } catch (error) { return new Response('Error', { status: 500 }); }
