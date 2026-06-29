@@ -69,18 +69,7 @@ const HTML_CONTENT = `
         width: 115px; outline: none; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6" viewBox="0 0 12 6"><path fill="%2343b883" d="M0 0l6 6 6-6z"/></svg>');
         background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.06);
     }
-    .search-bar input {
-    flex: 1; border: none; padding: 12px 20px; font-size: 15px; 
-    background-color: transparent; outline: none; color: #333; min-width: 0;
-    /* 新增：禁止浏览器自动填充背景色 */
-    -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0) inset !important;
-    -webkit-text-fill-color: #333 !important;
-}
-body.dark-theme .search-bar input {
-    color: #e3e3e3;
-    -webkit-box-shadow: 0 0 0px 1000px rgba(30,33,40,0) inset !important;
-    -webkit-text-fill-color: #e3e3e3 !important;
-}
+    .search-bar input { flex: 1; border: none; padding: 12px 20px; font-size: 15px; background-color: transparent; outline: none; color: #333; min-width: 0; -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,0) inset !important; -webkit-text-fill-color: #333 !important; }
     .search-bar button { border: none; background-color: transparent; color: #43b883; padding: 0 25px; cursor: pointer; font-size: 18px; transition: all 0.2s; }
     .search-bar button:hover { background-color: rgba(67, 184, 131, 0.1); color: #35a674; }
 
