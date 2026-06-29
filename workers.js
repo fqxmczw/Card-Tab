@@ -21,7 +21,7 @@ const HTML_CONTENT = `
     body {
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         background-color: #121418; color: #222; transition: all 0.4s ease;
-        background-image: url('https://img.cdn1.vip/i/6a42520ee6135_1782731278.webp');
+        background-image: url('https://imgbed.woblog.ccwu.cc/file/wallpapers/1782738506924_R.webp');
         background-size: cover; background-position: center top; background-attachment: fixed; background-repeat: no-repeat;
         min-height: 100vh;
     }
