@@ -21,7 +21,7 @@ const HTML_CONTENT = `
     body {
         font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         background-color: #121418; color: #222; transition: all 0.4s ease;
-        background-image: url('https://api.tomys.top/api/acgimg');
+        background-image: url('https://th.bing.com/th/id/R.d487b3896ef34910cc2577d5c4a5cde6?rik=%2b95P%2f81W4YY0yA&riu=http%3a%2f%2fi1.hdslb.com%2fbfs%2farchive%2f5215e458a79a07bd555919e1992b9b4cd66a9989.jpg&ehk=VhSq%2bgunRvclCGKDhx8Nkjm8196neeWnjaqRI3BaS84%3d&risl=&pid=ImgRaw&r=0');
         background-size: cover; background-position: center top; background-attachment: fixed; background-repeat: no-repeat;
         min-height: 100vh;
     }
